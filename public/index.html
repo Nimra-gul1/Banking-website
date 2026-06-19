@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MDBest Banking — Web Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --navy: #0A1628;
+    --navy-mid: #122040;
+    --navy-light: #1E3358;
+    --gold: #C9A84C;
+    --gold-light: #E8C97A;
+    --gold-pale: #FDF4E3;
+    --silver: #8A97A8;
+    --white: #FFFFFF;
+    --off-white: #F7F9FB;
+    --text-main: #0A1628;
+    --text-muted: #4A5568;
+    --border: #E2E8F0;
+    --success: #1A6B44;
+    --success-bg: #E9F6EF;
+    --error: #C0392B;
+    --error-bg: #FDECEA;
+  }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--off-white);
+    color: var(--text-main);
+    min-height: 100vh;
+  }
+
+  /* ── NAV ── */
+  header {
+    background: var(--navy);
+    padding: 1.25rem 2rem;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+  }
+  .logo {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--gold);
+    font-size: 15px;
+    letter-spacing: 0.06em;
+  }
+  .logo span { color: rgba(201,168,76,0.45); }
+  .status-pill {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--silver);
+    background: rgba(255,255,255,0.05);
+    padding: 5px 12px;
+    border-radius: 100px;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .dot-live { width: 7px; height: 7px; border-radius: 50%; background: #4EC994; animation: pulse 2s infinite; }
+  .dot-down { width: 7px; height: 7px; border-radius: 50%; background: #E84057; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  main {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 2.5rem 1.5rem 4rem;
+  }
+
+  .page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: var(--navy);
+    margin-bottom: 0.4rem;
+  }
+  .page-subtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 2rem;
+  }
+
+  /* ── TABS ── */
+  .tabs {
+    display: flex;
+    gap: 0.4rem;
+    margin-bottom: 1.75rem;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .tab-btn {
+    background: none; border: none;
+    padding: 0.7rem 1.1rem;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+    font-family: 'Inter', sans-serif;
+  }
+  .tab-btn.active {
+    color: var(--navy);
+    border-bottom-color: var(--gold);
+    font-weight: 600;
+  }
+  .tab-btn:hover:not(.active) { color: var(--navy); }
+
+  .panel { display: none; }
+  .panel.active { display: block; animation: fadeIn 0.2s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 2rem;
+    max-width: 480px;
+  }
+  .card h2 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--navy);
+    margin-bottom: 1.5rem;
+  }
+  .field { margin-bottom: 1.25rem; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  .field input, .field select {
+    width: 100%;
+    padding: 0.65rem 0.85rem;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    color: var(--text-main);
+    background: var(--white);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input:focus, .field select:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(201,168,76,0.12);
+  }
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 100%;
+    background: var(--navy);
+    color: var(--white);
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    font-family: 'Inter', sans-serif;
+  }
+  .btn:hover { background: var(--navy-light); }
+  .btn:active { transform: scale(0.98); }
+  .btn-gold { background: var(--gold); color: var(--navy); }
+  .btn-gold:hover { background: var(--gold-light); }
+
+  /* ── RESULT BOX ── */
+  .result {
+    margin-top: 1.25rem;
+    padding: 1rem 1.1rem;
+    border-radius: 8px;
+    font-size: 13px;
+    line-height: 1.6;
+    display: none;
+  }
+  .result.show { display: block; }
+  .result.success { background: var(--success-bg); color: var(--success); border: 1px solid rgba(26,107,68,0.2); }
+  .result.error { background: var(--error-bg); color: var(--error); border: 1px solid rgba(192,57,43,0.2); }
+  .result strong { display: block; margin-bottom: 0.3rem; font-size: 13px; }
+  .result .detail-row { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; padding: 2px 0; }
+
+  /* ── ACCOUNTS TABLE ── */
+  .table-wrap {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    text-align: left;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-muted);
+    background: var(--off-white);
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+  }
+  td {
+    padding: 0.9rem 1.25rem;
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-main);
+  }
+  tr:last-child td { border-bottom: none; }
+  .acc-id { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted); }
+  .badge {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 9px;
+    border-radius: 100px;
+    font-weight: 500;
+  }
+  .badge-savings { background: var(--gold-pale); color: #8A6D1F; }
+  .badge-current { background: #E8F0FE; color: #1A4F8C; }
+  .balance-cell { font-family: 'JetBrains Mono', monospace; font-weight: 600; text-align: right; }
+  .empty-state {
+    padding: 3rem 1.5rem;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 14px;
+  }
+  .link-btn {
+    background: none; border: none; color: var(--gold); cursor: pointer;
+    font-size: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+    padding: 0;
+  }
+  .link-btn:hover { color: #A88638; }
+
+  /* ── STATEMENT ── */
+  .statement-header {
+    background: var(--navy);
+    color: var(--white);
+    border-radius: 10px 10px 0 0;
+    padding: 1.5rem 1.75rem;
+  }
+  .statement-header .acc-name { font-size: 18px; font-weight: 600; margin-bottom: 0.2rem; }
+  .statement-header .acc-meta { font-size: 12px; color: var(--silver); font-family: 'JetBrains Mono', monospace; }
+  .statement-balance {
+    margin-top: 1rem;
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-top: 1px solid rgba(255,255,255,0.12);
+    padding-top: 1rem;
+  }
+  .statement-balance .label { font-size: 12px; color: var(--silver); }
+  .statement-balance .amount { font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 700; color: var(--gold-light); }
+
+  .txn-row {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0.95rem 1.75rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+  }
+  .txn-row:last-child { border-bottom: none; border-radius: 0 0 10px 10px; }
+  .txn-left { display: flex; align-items: center; gap: 0.85rem; }
+  .txn-icon {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+  .txn-icon.deposit { background: var(--success-bg); color: var(--success); }
+  .txn-icon.withdraw { background: var(--error-bg); color: var(--error); }
+  .txn-type { font-size: 13px; font-weight: 600; color: var(--navy); }
+  .txn-time { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+  .txn-right { text-align: right; }
+  .txn-amount { font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 600; }
+  .txn-amount.deposit { color: var(--success); }
+  .txn-amount.withdraw { color: var(--error); }
+  .txn-balance { font-size: 11px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace; }
+
+  .back-link {
+    display: inline-flex; align-items: center; gap: 6px;
+    color: var(--text-muted); font-size: 13px; font-weight: 500;
+    cursor: pointer; margin-bottom: 1.25rem; background: none; border: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .back-link:hover { color: var(--navy); }
+
+  .lookup-row { display: flex; gap: 0.6rem; max-width: 480px; }
+  .lookup-row input { flex: 1; }
+  .lookup-row button { width: auto; padding: 0.65rem 1.25rem; white-space: nowrap; }
+
+  @media (max-width: 640px) {
+    .table-wrap { overflow-x: auto; }
+    table { min-width: 560px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">MDBest<span>::</span>Banking</span>
+  <div class="status-pill">
+    <span id="status-dot" class="dot-down"></span>
+    <span id="status-text">checking server…</span>
+  </div>
+</header>
+
+<main>
+  <h1 class="page-title">Banking Console</h1>
+  <p class="page-subtitle">A C++ backend serving real account operations over HTTP — every action here hits the server and persists to disk.</p>
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="create">Create Account</button>
+    <button class="tab-btn" data-tab="deposit">Deposit</button>
+    <button class="tab-btn" data-tab="withdraw">Withdraw</button>
+    <button class="tab-btn" data-tab="statement">Statement</button>
+    <button class="tab-btn" data-tab="accounts">All Accounts</button>
+  </div>
+
+  <!-- CREATE -->
+  <section class="panel active" id="panel-create">
+    <div class="card">
+      <h2>Create New Account</h2>
+      <div class="field">
+        <label>Holder Name</label>
+        <input type="text" id="create-name" placeholder="e.g. Muhammad Bilal">
+      </div>
+      <div class="field">
+        <label>Account Type</label>
+        <select id="create-type">
+          <option value="Savings">Savings</option>
+          <option value="Current">Current</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Opening Deposit (PKR)</label>
+        <input type="number" id="create-opening" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <button class="btn btn-gold" onclick="createAccount()">Create Account</button>
+      <div class="result" id="create-result"></div>
+    </div>
+  </section>
+
+  <!-- DEPOSIT -->
+  <section class="panel" id="panel-deposit">
+    <div class="card">
+      <h2>Deposit Funds</h2>
+      <div class="field">
+        <label>Account ID</label>
+        <input type="text" id="deposit-id" placeholder="ACC-1781810060">
+      </div>
+      <div class="field">
+        <label>Amount (PKR)</label>
+        <input type="number" id="deposit-amount" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <button class="btn" onclick="depositFunds()">Deposit</button>
+      <div class="result" id="deposit-result"></div>
+    </div>
+  </section>
+
+  <!-- WITHDRAW -->
+  <section class="panel" id="panel-withdraw">
+    <div class="card">
+      <h2>Withdraw Funds</h2>
+      <div class="field">
+        <label>Account ID</label>
+        <input type="text" id="withdraw-id" placeholder="ACC-1781810060">
+      </div>
+      <div class="field">
+        <label>Amount (PKR)</label>
+        <input type="number" id="withdraw-amount" placeholder="0.00" min="0" step="0.01">
+      </div>
+      <button class="btn" onclick="withdrawFunds()">Withdraw</button>
+      <div class="result" id="withdraw-result"></div>
+    </div>
+  </section>
+
+  <!-- STATEMENT -->
+  <section class="panel" id="panel-statement">
+    <div id="statement-lookup">
+      <div class="card">
+        <h2>View Statement</h2>
+        <div class="lookup-row">
+          <input type="text" id="statement-id" placeholder="Enter Account ID">
+          <button class="btn" style="width:auto" onclick="loadStatement()">View</button>
+        </div>
+        <div class="result" id="statement-result"></div>
+      </div>
+    </div>
+    <div id="statement-view" style="display:none; max-width: 560px;"></div>
+  </section>
+
+  <!-- ACCOUNTS -->
+  <section class="panel" id="panel-accounts">
+    <div class="table-wrap" id="accounts-table-wrap">
+      <div class="empty-state">Loading accounts…</div>
+    </div>
+  </section>
+</main>
+
+<script>
+const API = '';
+
+// ── Tab switching ──────────────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('panel-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'accounts') loadAccounts();
+  });
+});
+
+// ── Server health check ───────────────────────────────────────
+async function checkStatus() {
+  const dot = document.getElementById('status-dot');
+  const text = document.getElementById('status-text');
+  try {
+    const res = await fetch(API + '/api/accounts');
+    if (res.ok) {
+      dot.className = 'dot-live';
+      text.textContent = 'server connected';
+    } else {
+      throw new Error();
+    }
+  } catch {
+    dot.className = 'dot-down';
+    text.textContent = 'server offline';
+  }
+}
+checkStatus();
+setInterval(checkStatus, 8000);
+
+function showResult(elId, success, html) {
+  const el = document.getElementById(elId);
+  el.className = 'result show ' + (success ? 'success' : 'error');
+  el.innerHTML = html;
+}
+
+function fmtMoney(n) {
+  return 'PKR ' + Number(n).toLocaleString('en-PK', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+// ── Create Account ─────────────────────────────────────────────
+async function createAccount() {
+  const name = document.getElementById('create-name').value.trim();
+  const type = document.getElementById('create-type').value;
+  const opening = document.getElementById('create-opening').value || '0';
+
+  if (!name) {
+    showResult('create-result', false, '<strong>Error</strong>Holder name is required.');
+    return;
+  }
+
+  try {
+    const res = await fetch(API + '/api/accounts', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, type, opening })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('create-result', true,
+        `<strong>✓ Account created successfully</strong>
+         <div class="detail-row"><span>Account ID</span><span>${data.account.accountId}</span></div>
+         <div class="detail-row"><span>Holder</span><span>${data.account.holderName}</span></div>
+         <div class="detail-row"><span>Type</span><span>${data.account.accountType}</span></div>
+         <div class="detail-row"><span>Balance</span><span>${fmtMoney(data.account.balance)}</span></div>`);
+      document.getElementById('create-name').value = '';
+      document.getElementById('create-opening').value = '';
+    } else {
+      showResult('create-result', false, '<strong>Error</strong>' + data.error);
+    }
+  } catch (e) {
+    showResult('create-result', false, '<strong>Connection Error</strong>Could not reach the server. Is banking_server running?');
+  }
+}
+
+// ── Deposit ──────────────────────────────────────────────────────
+async function depositFunds() {
+  const id = document.getElementById('deposit-id').value.trim();
+  const amount = document.getElementById('deposit-amount').value;
+
+  if (!id || !amount) {
+    showResult('deposit-result', false, '<strong>Error</strong>Account ID and amount are required.');
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/api/accounts/${id}/deposit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('deposit-result', true,
+        `<strong>✓ Deposit successful</strong>
+         <div class="detail-row"><span>New Balance</span><span>${fmtMoney(data.account.balance)}</span></div>`);
+      document.getElementById('deposit-amount').value = '';
+    } else {
+      showResult('deposit-result', false, '<strong>Error</strong>' + data.error);
+    }
+  } catch (e) {
+    showResult('deposit-result', false, '<strong>Connection Error</strong>Could not reach the server.');
+  }
+}
+
+// ── Withdraw ─────────────────────────────────────────────────────
+async function withdrawFunds() {
+  const id = document.getElementById('withdraw-id').value.trim();
+  const amount = document.getElementById('withdraw-amount').value;
+
+  if (!id || !amount) {
+    showResult('withdraw-result', false, '<strong>Error</strong>Account ID and amount are required.');
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/api/accounts/${id}/withdraw`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ amount })
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('withdraw-result', true,
+        `<strong>✓ Withdrawal successful</strong>
+         <div class="detail-row"><span>Remaining Balance</span><span>${fmtMoney(data.account.balance)}</span></div>`);
+      document.getElementById('withdraw-amount').value = '';
+    } else {
+      showResult('withdraw-result', false, '<strong>Error</strong>' + data.error);
+    }
+  } catch (e) {
+    showResult('withdraw-result', false, '<strong>Connection Error</strong>Could not reach the server.');
+  }
+}
+
+// ── Statement ────────────────────────────────────────────────────
+async function loadStatement() {
+  const id = document.getElementById('statement-id').value.trim();
+  if (!id) {
+    showResult('statement-result', false, '<strong>Error</strong>Please enter an Account ID.');
+    return;
+  }
+
+  try {
+    const res = await fetch(API + `/api/accounts/${id}/statement`);
+    const data = await res.json();
+    if (!data.success) {
+      showResult('statement-result', false, '<strong>Error</strong>' + data.error);
+      return;
+    }
+
+    document.getElementById('statement-lookup').style.display = 'none';
+    const view = document.getElementById('statement-view');
+    view.style.display = 'block';
+
+    const txnHtml = data.transactions.length === 0
+      ? '<div class="empty-state">No transactions yet.</div>'
+      : data.transactions.slice().reverse().map(t => `
+        <div class="txn-row">
+          <div class="txn-left">
+            <div class="txn-icon ${t.type.toLowerCase()}">${t.type === 'DEPOSIT' ? '↑' : '↓'}</div>
+            <div>
+              <div class="txn-type">${t.type === 'DEPOSIT' ? 'Deposit' : 'Withdrawal'}</div>
+              <div class="txn-time">${t.time} · ${t.id}</div>
+            </div>
+          </div>
+          <div class="txn-right">
+            <div class="txn-amount ${t.type.toLowerCase()}">${t.type === 'DEPOSIT' ? '+' : '−'} ${fmtMoney(t.amount)}</div>
+            <div class="txn-balance">Bal: ${fmtMoney(t.balanceAfter)}</div>
+          </div>
+        </div>`).join('');
+
+    view.innerHTML = `
+      <button class="back-link" onclick="resetStatement()">← Back to search</button>
+      <div class="statement-header">
+        <div class="acc-name">${data.account.holderName}</div>
+        <div class="acc-meta">${data.account.accountId} · ${data.account.accountType}</div>
+        <div class="statement-balance">
+          <span class="label">Current Balance</span>
+          <span class="amount">${fmtMoney(data.account.balance)}</span>
+        </div>
+      </div>
+      <div>${txnHtml}</div>
+    `;
+  } catch (e) {
+    showResult('statement-result', false, '<strong>Connection Error</strong>Could not reach the server.');
+  }
+}
+
+function resetStatement() {
+  document.getElementById('statement-lookup').style.display = 'block';
+  document.getElementById('statement-view').style.display = 'none';
+  document.getElementById('statement-id').value = '';
+}
+
+// ── All Accounts ─────────────────────────────────────────────────
+async function loadAccounts() {
+  const wrap = document.getElementById('accounts-table-wrap');
+  wrap.innerHTML = '<div class="empty-state">Loading accounts…</div>';
+
+  try {
+    const res = await fetch(API + '/api/accounts');
+    const data = await res.json();
+
+    if (!data.success || data.accounts.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No accounts yet. Create one to get started.</div>';
+      return;
+    }
+
+    const rows = data.accounts.map(acc => `
+      <tr>
+        <td class="acc-id">${acc.accountId}</td>
+        <td>${acc.holderName}</td>
+        <td><span class="badge badge-${acc.accountType.toLowerCase()}">${acc.accountType}</span></td>
+        <td class="balance-cell">${fmtMoney(acc.balance)}</td>
+        <td><button class="link-btn" onclick="viewFromTable('${acc.accountId}')">View Statement →</button></td>
+      </tr>`).join('');
+
+    wrap.innerHTML = `
+      <table>
+        <thead><tr><th>Account ID</th><th>Holder</th><th>Type</th><th style="text-align:right">Balance</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  } catch (e) {
+    wrap.innerHTML = '<div class="empty-state">Could not reach the server.</div>';
+  }
+}
+
+function viewFromTable(id) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelector('[data-tab="statement"]').classList.add('active');
+  document.getElementById('panel-statement').classList.add('active');
+  document.getElementById('statement-id').value = id;
+  loadStatement();
+}
+</script>
+</body>
+</html>
