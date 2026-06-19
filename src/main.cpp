@@ -187,7 +187,7 @@ int main() {
 
     std::cout << "\n";
     std::cout << "  ============================================\n";
-    std::cout << "   MDBest Banking System — Web Server\n";
+    std::cout << "   Banking System — Web Server\n";
     std::cout << "   Running at: http://localhost:8080\n";
     std::cout << "   Press Ctrl+C to stop\n";
     std::cout << "  ============================================\n\n";
