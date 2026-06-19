@@ -1,4 +1,4 @@
-# Banking System — Web Edition
+# Banking System — Web 
 
 A real C++ backend (HTTP server) powering a browser-based banking console.
 Every button click in the browser sends a request to the C++ server, which
